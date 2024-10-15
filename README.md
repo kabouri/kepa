@@ -1,6 +1,5 @@
 ## Auteurs
-# Votre Nom - https://www.linkedin.com/in/abdelwahedkabouri - Remplacez ceci par votre lien LinkedIn
-
+# Abdelwahed Kabouri - https://www.linkedin.com/in/abdelwahedkabouri - 
 
 # Job Matcher
 
