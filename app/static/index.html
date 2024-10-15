@@ -11,6 +11,10 @@
             margin: 0;
             padding: 20px;
             color: #fff; /* Couleur du texte par défaut */
+            display: flex; /* Utilisation du flex pour la mise en page */
+            justify-content: center; /* Centre horizontalement */
+            align-items: flex-start; /* Aligne les éléments en haut */
+            gap: 20px; /* Espace entre les colonnes */
         }
         h1 {
             text-align: center;
@@ -18,7 +22,6 @@
         }
         .container {
             max-width: 600px;
-            margin: 0 auto;
             padding: 20px;
             background: rgba(255, 255, 255, 0.9); /* Fond blanc avec transparence */
             border-radius: 8px;
@@ -30,7 +33,7 @@
             font-weight: bold;
             color: #333; /* Couleur des étiquettes */
         }
-        input[type="file"] {
+        input[type="file"], input[type="number"] {
             width: 100%;
             padding: 10px;
             border: 1px solid #ccc;
@@ -59,6 +62,28 @@
             text-align: center;
             color: #333; /* Couleur du texte pour les résultats */
         }
+        #battery-container {
+            width: 300px; /* Largeur fixe pour la barre de batterie */
+            background-color: #ccc; /* Couleur de fond de la batterie */
+            border-radius: 5px;
+            padding: 5px;
+            position: relative; /* Pour positionner la "jauge" à l'intérieur */
+            margin-top: 20px; /* Espace au-dessus de la barre de batterie */
+        }
+        #battery-bar {
+            height: 30px; /* Hauteur de la barre de batterie */
+            width: 0; /* Largeur initiale */
+            background-color: green; /* Couleur par défaut */
+            border-radius: 5px;
+            line-height: 30px; /* Centre le texte verticalement */
+            color: white; /* Couleur du texte */
+            text-align: center; /* Centre le texte horizontalement */
+        }
+        #score {
+            text-align: center; /* Centre le score */
+            margin-top: 5px; /* Espace au-dessus du score */
+            font-weight: bold; /* Met en gras */
+        }
     </style>
 </head>
 <body>
@@ -71,11 +96,19 @@
             <label for="job">Téléchargez l'offre d'emploi :</label>
             <input type="file" id="job" name="job" accept=".pdf,.txt" required>
             
+            <label for="threshold">Fixez le seuil de score de similarité (%):</label>
+            <input type="number" id="threshold" name="threshold" min="0" max="100" value="50" required> <!-- Champ pour le seuil -->
+            
             <button type="submit">Check Match</button>
         </form>
         
         <div id="result"></div>
     </div>
+    
+    <div id="battery-container">
+        <div id="battery-bar">0%</div>
+    </div>
+    <div id="score">0</div> <!-- Score affiché en dessous de la barre de batterie -->
 
     <script>
         document.getElementById("job-match-form").addEventListener("submit", async function(event) {
@@ -83,6 +116,7 @@
             
             const cvFile = document.getElementById("cv").files[0];
             const jobFile = document.getElementById("job").files[0];
+            const threshold = parseFloat(document.getElementById("threshold").value); // Récupérer le seuil
 
             const formData = new FormData();
             formData.append("cv", cvFile);
@@ -95,7 +129,26 @@
             
             const data = await response.json();
             const resultDiv = document.getElementById("result");
-            resultDiv.innerHTML = `Match: ${data.match ? "Oui" : "Non"}, Score de Similarité: ${data.similarity_score}`;
+            const similarityScore = data.similarity_score * 100; // Multiplie le score par 100 pour l'affichage
+            
+
+            // Afficher le score de similarité sur la barre
+            const batteryBar = document.getElementById("battery-bar");
+            batteryBar.style.width = similarityScore + '%';
+            batteryBar.innerHTML = similarityScore.toFixed(0) + '%'; // Arrondit à l'entier le plus proche
+            
+            // Changer la couleur de la barre en fonction du score
+            if (similarityScore > threshold) {
+                batteryBar.style.backgroundColor = 'green'; // Score supérieur au seuil
+            } else if (similarityScore > threshold / 2) {
+                batteryBar.style.backgroundColor = 'yellow'; // Score moyen
+            } else {
+                batteryBar.style.backgroundColor = 'red'; // Score faible
+            }
+
+            // Afficher le score numérique en dessous de la barre
+            const scoreDiv = document.getElementById("score");
+            scoreDiv.innerHTML = similarityScore.toFixed(0) + '%'; // Score en chiffres, arrondi à l'entier le plus proche
         });
     </script>
 </body>
